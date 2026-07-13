@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  COACH
+  COORDINATOR
+  HOD
+  ADMIN
+}
+
+enum StaffRole {
+  COACH
+  COORDINATOR
+}
+
+enum EnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  studentProfile   StudentProfile?
+  staffAssignment  StaffAssignment?
+  loginLogs        LoginLog[]
+  decidedEnrollments Enrollment[] @relation("EnrollmentDecidedBy")
+  createdDrills    Drill[]
+  createdMatches   MatchSchedule[]
+  setTimings       CampTiming[]
+  markedAttendance Attendance[] @relation("AttendanceMarkedBy")
+  editedAttendance Attendance[] @relation("AttendanceEditedBy")
+}
+
+model StudentProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ktuId      String   @unique
+  semester   Int
+  department String
+  phone      String
+  dob        DateTime
+
+  enrollments Enrollment[]
+}
+
+model StaffAssignment {
+  id     String    @id @default(cuid())
+  userId String    @unique
+  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sportId String
+  sport  Sport     @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  role   StaffRole
+
+  staffAttendance StaffAttendance[]
+
+  @@index([sportId])
+}
+
+model Sport {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  staffAssignments StaffAssignment[]
+  enrollments      Enrollment[]
+  drills           Drill[]
+  matches          MatchSchedule[]
+  timings          CampTiming[]
+}
+
+model Enrollment {
+  id               String           @id @default(cuid())
+  studentProfileId String
+  studentProfile   StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  sportId          String
+  sport            Sport            @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  status           EnrollmentStatus @default(PENDING)
+  appliedAt        DateTime         @default(now())
+  decidedById      String?
+  decidedBy        User?            @relation("EnrollmentDecidedBy", fields: [decidedById], references: [id])
+  decidedAt        DateTime?
+
+  attendance Attendance[]
+
+  @@unique([studentProfileId, sportId])
+  @@index([sportId, status])
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  date         DateTime         @db.Date
+  status       AttendanceStatus
+  markedAt     DateTime         @default(now())
+  markedById   String
+  markedBy     User             @relation("AttendanceMarkedBy", fields: [markedById], references: [id])
+  editedAt     DateTime?
+  editedById   String?
+  editedBy     User?            @relation("AttendanceEditedBy", fields: [editedById], references: [id])
+
+  @@unique([enrollmentId, date])
+  @@index([date])
+}
+
+model StaffAttendance {
+  id                String          @id @default(cuid())
+  staffAssignmentId String
+  staffAssignment   StaffAssignment @relation(fields: [staffAssignmentId], references: [id], onDelete: Cascade)
+  date              DateTime        @db.Date
+  markedAt          DateTime        @default(now())
+
+  @@unique([staffAssignmentId, date])
+}
+
+model Drill {
+  id          String   @id @default(cuid())
+  sportId     String
+  sport       Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  coachId     String
+  coach       User     @relation(fields: [coachId], references: [id])
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+
+  @@index([sportId, createdAt])
+}
+
+model MatchSchedule {
+  id        String   @id @default(cuid())
+  sportId   String
+  sport     Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  opponent  String
+  matchDate DateTime
+  venue     String
+  createdById String
+  createdBy User     @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([sportId, matchDate])
+}
+
+model CampTiming {
+  id        String   @id @default(cuid())
+  sportId   String
+  sport     Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  startTime String
+  endTime   String
+  setById   String
+  setBy     User     @relation(fields: [setById], references: [id])
+  updatedAt DateTime @updatedAt
+
+  @@unique([sportId, date])
+}
+
+model LoginLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timestamp DateTime @default(now())
+
+  @@index([userId, timestamp])
+}
