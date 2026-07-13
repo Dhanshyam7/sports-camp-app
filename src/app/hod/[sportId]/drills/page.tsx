@@ -31,7 +31,7 @@ export default async function HodDrillsPage({ params }: { params: Promise<{ spor
               <span className="text-xs text-slate-400">{formatDate(drill.createdAt)}</span>
             </div>
             <p className="mt-1 text-sm text-slate-300">{drill.description}</p>
-            <p className="mt-2 text-xs text-slate-500">Posted by {drill.coach.name}</p>
+            <p className="mt-2 text-xs text-slate-500">Posted by {drill.coach?.name ?? "a former staff member"}</p>
           </div>
         ))}
         {drills.length === 0 && <p className={mutedText}>No drills posted yet.</p>}

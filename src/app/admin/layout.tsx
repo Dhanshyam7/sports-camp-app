@@ -12,6 +12,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         items={[
           { href: "/admin/stats", label: "Login Stats" },
           { href: "/admin/staff", label: "Staff Accounts" },
+          { href: "/admin/players", label: "Players" },
         ]}
       />
       <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>

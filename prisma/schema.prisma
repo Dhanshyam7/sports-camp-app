@@ -117,11 +117,11 @@ model Attendance {
   date         DateTime         @db.Date
   status       AttendanceStatus
   markedAt     DateTime         @default(now())
-  markedById   String
-  markedBy     User             @relation("AttendanceMarkedBy", fields: [markedById], references: [id])
+  markedById   String?
+  markedBy     User?            @relation("AttendanceMarkedBy", fields: [markedById], references: [id], onDelete: SetNull)
   editedAt     DateTime?
   editedById   String?
-  editedBy     User?            @relation("AttendanceEditedBy", fields: [editedById], references: [id])
+  editedBy     User?            @relation("AttendanceEditedBy", fields: [editedById], references: [id], onDelete: SetNull)
 
   @@unique([enrollmentId, date])
   @@index([date])
@@ -141,8 +141,8 @@ model Drill {
   id          String   @id @default(cuid())
   sportId     String
   sport       Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
-  coachId     String
-  coach       User     @relation(fields: [coachId], references: [id])
+  coachId     String?
+  coach       User?    @relation(fields: [coachId], references: [id], onDelete: SetNull)
   title       String
   description String
   createdAt   DateTime @default(now())
@@ -157,8 +157,8 @@ model MatchSchedule {
   opponent  String
   matchDate DateTime
   venue     String
-  createdById String
-  createdBy User     @relation(fields: [createdById], references: [id])
+  createdById String?
+  createdBy User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
 
   @@index([sportId, matchDate])
@@ -171,8 +171,8 @@ model CampTiming {
   date      DateTime @db.Date
   startTime String
   endTime   String
-  setById   String
-  setBy     User     @relation(fields: [setById], references: [id])
+  setById   String?
+  setBy     User?    @relation(fields: [setById], references: [id], onDelete: SetNull)
   updatedAt DateTime @updatedAt
 
   @@unique([sportId, date])

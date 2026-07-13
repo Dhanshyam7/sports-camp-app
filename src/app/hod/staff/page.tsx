@@ -1,7 +1,9 @@
 import { requirePageRole } from "@/lib/permissions";
 import { getStaffAccounts, getAllSportsForForm } from "@/lib/data/admin";
+import { deleteStaffAccountAction } from "@/lib/actions/admin-actions";
 import { CreateStaffForm } from "@/components/admin/CreateStaffForm";
-import { glassCard, glassPanelPad, heading, tableWrap, tableHeadRow, tableHeadCell, tableRow, tableCell } from "@/lib/ui";
+import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
+import { glassCard, glassPanelPad, heading, tableWrap, tableHeadRow, tableHeadCell, tableRow, tableCell, pillDanger } from "@/lib/ui";
 
 export default async function HodStaffPage() {
   await requirePageRole(["HOD"]);
@@ -24,6 +26,7 @@ export default async function HodStaffPage() {
                 <th className={tableHeadCell}>Username</th>
                 <th className={tableHeadCell}>Role</th>
                 <th className={tableHeadCell}>Sport</th>
+                <th className={tableHeadCell}>Delete</th>
               </tr>
             </thead>
             <tbody>
@@ -33,6 +36,19 @@ export default async function HodStaffPage() {
                   <td className={tableCell}>{s.username}</td>
                   <td className={tableCell}>{s.role}</td>
                   <td className={tableCell}>{s.staffAssignment?.sport.name ?? "-"}</td>
+                  <td className={tableCell}>
+                    {s.role !== "HOD" && (
+                      <form action={deleteStaffAccountAction}>
+                        <input type="hidden" name="userId" value={s.id} />
+                        <ConfirmSubmitButton
+                          className={pillDanger}
+                          confirmMessage={`Permanently delete ${s.name} (@${s.username})? This cannot be undone.`}
+                        >
+                          Delete
+                        </ConfirmSubmitButton>
+                      </form>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

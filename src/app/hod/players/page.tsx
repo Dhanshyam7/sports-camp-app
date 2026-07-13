@@ -3,7 +3,9 @@ import { requirePageRole } from "@/lib/permissions";
 import { getAllSports, getSportRoster } from "@/lib/data/hod";
 import { addStudentDirectlyAction } from "@/lib/actions/coordinator-actions";
 import { removeEnrollmentAction } from "@/lib/actions/hod-actions";
-import { glassCard, glassPanelPad, heading, mutedText, inputClass, pillPrimary, pillDanger, tabActive, tabInactive } from "@/lib/ui";
+import { deletePlayerAccountAction } from "@/lib/actions/admin-actions";
+import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
+import { glassCard, glassPanelPad, heading, mutedText, inputClass, pillPrimary, pillSecondary, pillDanger, tabActive, tabInactive } from "@/lib/ui";
 
 export default async function HodPlayersPage({
   searchParams,
@@ -55,13 +57,27 @@ export default async function HodPlayersPage({
                   <p className="font-medium text-white">{enrollment.studentProfile.user.name}</p>
                   <p className="text-xs text-slate-400">{enrollment.studentProfile.ktuId}</p>
                 </div>
-                <form action={removeEnrollmentAction}>
-                  <input type="hidden" name="sportId" value={activeSportId} />
-                  <input type="hidden" name="enrollmentId" value={enrollment.id} />
-                  <button type="submit" className={pillDanger}>
-                    Remove
-                  </button>
-                </form>
+                <div className="flex gap-2">
+                  <form action={removeEnrollmentAction}>
+                    <input type="hidden" name="sportId" value={activeSportId} />
+                    <input type="hidden" name="enrollmentId" value={enrollment.id} />
+                    <ConfirmSubmitButton
+                      className={pillSecondary}
+                      confirmMessage={`Remove ${enrollment.studentProfile.user.name} from this sport only? They'll keep their account and other sports.`}
+                    >
+                      Remove from sport
+                    </ConfirmSubmitButton>
+                  </form>
+                  <form action={deletePlayerAccountAction}>
+                    <input type="hidden" name="userId" value={enrollment.studentProfile.user.id} />
+                    <ConfirmSubmitButton
+                      className={pillDanger}
+                      confirmMessage={`Permanently delete ${enrollment.studentProfile.user.name}'s entire account, including every sport and attendance record? This cannot be undone.`}
+                    >
+                      Delete account
+                    </ConfirmSubmitButton>
+                  </form>
+                </div>
               </div>
             ))}
             {roster.length === 0 && <p className={mutedText}>No players in this sport yet.</p>}

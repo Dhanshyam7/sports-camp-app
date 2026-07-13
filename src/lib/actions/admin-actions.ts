@@ -101,3 +101,50 @@ export async function adminResetPasswordAction(
 
   return { success: `Password updated for ${user.name} (@${user.username}).` };
 }
+
+export async function deleteStaffAccountAction(formData: FormData) {
+  const session = await requirePageRole(["ADMIN", "HOD"]);
+  const userId = String(formData.get("userId") ?? "");
+  if (!userId) throw new Error("User is required");
+  if (userId === session.user.id) throw new Error("You cannot delete your own account");
+
+  const target = await prisma.user.findUnique({ where: { id: userId } });
+  if (!target || !["COACH", "COORDINATOR", "HOD"].includes(target.role)) {
+    throw new Error("Staff account not found");
+  }
+  if (session.user.role === "HOD" && target.role === "HOD") {
+    throw new Error("Only an Admin can delete a HOD account");
+  }
+
+  await prisma.user.delete({ where: { id: userId } });
+
+  revalidatePath("/admin/staff");
+  revalidatePath("/hod/staff");
+}
+
+export async function deletePlayerAccountAction(formData: FormData) {
+  await requirePageRole(["ADMIN", "HOD"]);
+
+  const userId = String(formData.get("userId") ?? "").trim();
+  const identifier = String(formData.get("identifier") ?? "").trim();
+
+  let targetUserId = userId;
+  if (!targetUserId) {
+    if (!identifier) throw new Error("Enter a KTU ID, username, or email");
+    const profile = await prisma.studentProfile.findFirst({
+      where: {
+        OR: [{ ktuId: identifier }, { user: { username: identifier } }, { user: { email: identifier } }],
+      },
+    });
+    if (!profile) throw new Error("No student found with that KTU ID, username, or email");
+    targetUserId = profile.userId;
+  }
+
+  const target = await prisma.user.findUnique({ where: { id: targetUserId } });
+  if (!target || target.role !== "STUDENT") throw new Error("Student account not found");
+
+  await prisma.user.delete({ where: { id: targetUserId } });
+
+  revalidatePath("/hod/players");
+  revalidatePath("/admin/players");
+}

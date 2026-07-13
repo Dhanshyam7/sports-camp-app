@@ -22,7 +22,7 @@ export default async function StudentDrillsPage({ params }: { params: Promise<{ 
             <span className="text-xs text-slate-400">{formatDate(drill.createdAt)}</span>
           </div>
           <p className="mt-1 text-sm text-slate-300">{drill.description}</p>
-          <p className="mt-2 text-xs text-slate-500">Assigned by {drill.coach.name}</p>
+          <p className="mt-2 text-xs text-slate-500">Assigned by {drill.coach?.name ?? "a former staff member"}</p>
         </div>
       ))}
     </div>
