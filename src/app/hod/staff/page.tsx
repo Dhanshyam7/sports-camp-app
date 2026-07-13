@@ -1,26 +1,17 @@
 import { requirePageRole } from "@/lib/permissions";
 import { getStaffAccounts, getAllSportsForForm } from "@/lib/data/admin";
 import { CreateStaffForm } from "@/components/admin/CreateStaffForm";
-import { ResetPasswordForm } from "@/components/admin/ResetPasswordForm";
-import { glassCard, glassPanelPad, heading, mutedText, tableWrap, tableHeadRow, tableHeadCell, tableRow, tableCell } from "@/lib/ui";
+import { glassCard, glassPanelPad, heading, tableWrap, tableHeadRow, tableHeadCell, tableRow, tableCell } from "@/lib/ui";
 
-export default async function AdminStaffPage() {
-  await requirePageRole(["ADMIN"]);
+export default async function HodStaffPage() {
+  await requirePageRole(["HOD"]);
   const [staff, sports] = await Promise.all([getStaffAccounts(), getAllSportsForForm()]);
 
   return (
     <div className="space-y-6">
       <div className={`${glassCard} ${glassPanelPad}`}>
-        <h2 className={`mb-3 ${heading}`}>Create Staff Account</h2>
-        <CreateStaffForm sports={sports} />
-      </div>
-
-      <div className={`${glassCard} ${glassPanelPad}`}>
-        <h2 className={`mb-1 ${heading}`}>Reset a User&apos;s Password</h2>
-        <p className={`mb-3 ${mutedText}`}>
-          Works for any account &mdash; student, coach, coordinator, HOD, or another admin.
-        </p>
-        <ResetPasswordForm />
+        <h2 className={`mb-3 ${heading}`}>Add a Coach or Coordinator</h2>
+        <CreateStaffForm sports={sports} allowedRoles={["COACH", "COORDINATOR"]} />
       </div>
 
       <div>
@@ -31,7 +22,6 @@ export default async function AdminStaffPage() {
               <tr>
                 <th className={tableHeadCell}>Name</th>
                 <th className={tableHeadCell}>Username</th>
-                <th className={tableHeadCell}>Email</th>
                 <th className={tableHeadCell}>Role</th>
                 <th className={tableHeadCell}>Sport</th>
               </tr>
@@ -41,7 +31,6 @@ export default async function AdminStaffPage() {
                 <tr key={s.id} className={tableRow}>
                   <td className={tableCell}>{s.name}</td>
                   <td className={tableCell}>{s.username}</td>
-                  <td className={tableCell}>{s.email}</td>
                   <td className={tableCell}>{s.role}</td>
                   <td className={tableCell}>{s.staffAssignment?.sport.name ?? "-"}</td>
                 </tr>

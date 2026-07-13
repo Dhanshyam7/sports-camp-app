@@ -4,9 +4,18 @@ import { useActionState, useState } from "react";
 import { createStaffAccountAction } from "@/lib/actions/admin-actions";
 import { inputClass, selectClass, label, pillPrimary } from "@/lib/ui";
 
-export function CreateStaffForm({ sports }: { sports: { id: string; name: string }[] }) {
+const ROLE_LABELS = { COACH: "Coach", COORDINATOR: "Coordinator", HOD: "HOD" } as const;
+type StaffRole = keyof typeof ROLE_LABELS;
+
+export function CreateStaffForm({
+  sports,
+  allowedRoles = ["COACH", "COORDINATOR", "HOD"],
+}: {
+  sports: { id: string; name: string }[];
+  allowedRoles?: StaffRole[];
+}) {
   const [state, action, pending] = useActionState(createStaffAccountAction, undefined);
-  const [role, setRole] = useState<"COACH" | "COORDINATOR" | "HOD">("COACH");
+  const [role, setRole] = useState<StaffRole>(allowedRoles[0]);
 
   return (
     <form action={action} className="space-y-4">
@@ -32,12 +41,14 @@ export function CreateStaffForm({ sports }: { sports: { id: string; name: string
           <select
             name="role"
             value={role}
-            onChange={(e) => setRole(e.target.value as typeof role)}
+            onChange={(e) => setRole(e.target.value as StaffRole)}
             className={selectClass}
           >
-            <option value="COACH">Coach</option>
-            <option value="COORDINATOR">Coordinator</option>
-            <option value="HOD">HOD</option>
+            {allowedRoles.map((r) => (
+              <option key={r} value={r}>
+                {ROLE_LABELS[r]}
+              </option>
+            ))}
           </select>
         </div>
         {role !== "HOD" && (

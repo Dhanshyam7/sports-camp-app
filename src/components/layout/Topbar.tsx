@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LogoutButton } from "@/components/layout/LogoutButton";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -29,6 +30,12 @@ export function Topbar({
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm text-slate-300 sm:inline">{name}</span>
+          <Link
+            href="/account"
+            className="rounded-full border border-white/20 bg-white/[0.08] px-4 py-1.5 text-xs font-medium text-white backdrop-blur-md transition hover:bg-white/[0.16]"
+          >
+            Account
+          </Link>
           <LogoutButton />
         </div>
       </div>

@@ -26,7 +26,7 @@ export async function createStaffAccountAction(
   _prevState: CreateStaffState,
   formData: FormData
 ): Promise<CreateStaffState> {
-  await requirePageRole(["ADMIN"]);
+  const session = await requirePageRole(["ADMIN", "HOD"]);
 
   const parsed = CreateStaffSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -34,6 +34,10 @@ export async function createStaffAccountAction(
   }
 
   const { name, username, email, password, role, sportId } = parsed.data;
+
+  if (session.user.role === "HOD" && role === "HOD") {
+    return { error: "Only an Admin can create another HOD account." };
+  }
   if ((role === "COACH" || role === "COORDINATOR") && !sportId) {
     return { error: "Select a sport for this role" };
   }
@@ -60,5 +64,40 @@ export async function createStaffAccountAction(
   });
 
   revalidatePath("/admin/staff");
+  revalidatePath("/hod/staff");
   return { success: true };
+}
+
+const ResetPasswordSchema = z.object({
+  identifier: z.string().trim().min(1, "Enter a username or email."),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters.")
+    .regex(/[a-zA-Z]/, "Password must contain a letter.")
+    .regex(/[0-9]/, "Password must contain a number."),
+});
+
+export type ResetPasswordState = { error?: string; success?: string } | undefined;
+
+export async function adminResetPasswordAction(
+  _prevState: ResetPasswordState,
+  formData: FormData
+): Promise<ResetPasswordState> {
+  await requirePageRole(["ADMIN"]);
+
+  const parsed = ResetPasswordSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { identifier, newPassword } = parsed.data;
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ username: identifier }, { email: identifier }] },
+  });
+  if (!user) return { error: "No account found with that username or email." };
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+
+  return { success: `Password updated for ${user.name} (@${user.username}).` };
 }

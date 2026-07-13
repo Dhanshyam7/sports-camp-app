@@ -13,6 +13,7 @@ export default async function HodLayout({ children }: { children: React.ReactNod
           { href: "/hod", label: "Sports Overview" },
           { href: "/hod/sports", label: "Manage Sports" },
           { href: "/hod/players", label: "Manage Players" },
+          { href: "/hod/staff", label: "Manage Staff" },
         ]}
       />
       <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
