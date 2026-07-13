@@ -1,11 +1,14 @@
 import { requirePageRole } from "@/lib/permissions";
 import { getStaffAssignment, getCoachAttendanceHistory } from "@/lib/data/coach";
+import { getExactTodayTiming } from "@/lib/data/sport";
 import { markCoachAttendanceAction } from "@/lib/actions/coach-actions";
+import { getAttendanceWindow } from "@/lib/attendance";
 import { formatDate, formatDateTime, todayDateOnly } from "@/lib/date";
 import {
   glassCard,
   glassPanelPad,
   heading,
+  mutedText,
   pillPrimarySm,
   tableWrap,
   tableHeadRow,
@@ -20,6 +23,8 @@ export default async function CoachMyAttendancePage() {
   const history = await getCoachAttendanceHistory(assignment.id);
   const today = todayDateOnly();
   const markedToday = history.find((a) => a.date.getTime() === today.getTime());
+  const timing = await getExactTodayTiming(assignment.sportId);
+  const window = getAttendanceWindow(timing);
 
   return (
     <div>
@@ -27,12 +32,14 @@ export default async function CoachMyAttendancePage() {
         <h2 className={heading}>Today</h2>
         {markedToday ? (
           <p className="mt-2 text-sm text-emerald-300">Marked present at {formatDateTime(markedToday.markedAt)}</p>
-        ) : (
+        ) : window.open ? (
           <form action={markCoachAttendanceAction} className="mt-3">
             <button type="submit" className={pillPrimarySm}>
               Mark myself present
             </button>
           </form>
+        ) : (
+          <p className={`mt-2 ${mutedText}`}>{window.reason}</p>
         )}
       </div>
 

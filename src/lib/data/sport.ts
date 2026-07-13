@@ -37,6 +37,14 @@ export async function getTodayTiming(sportId: string) {
   });
 }
 
+/** The timing set for exactly today (IST) — no fallback to a prior date. Used to gate attendance marking. */
+export async function getExactTodayTiming(sportId: string) {
+  const today = todayDateOnly();
+  return prisma.campTiming.findUnique({
+    where: { sportId_date: { sportId, date: today } },
+  });
+}
+
 export async function getTimingHistory(sportId: string) {
   return prisma.campTiming.findMany({
     where: { sportId },

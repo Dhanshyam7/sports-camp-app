@@ -1,11 +1,14 @@
 import { requirePageRole } from "@/lib/permissions";
 import { getApprovedEnrollment, getAttendanceHistory } from "@/lib/data/student";
+import { getExactTodayTiming } from "@/lib/data/sport";
 import { markOwnAttendanceAction } from "@/lib/actions/student-actions";
+import { getAttendanceWindow } from "@/lib/attendance";
 import { formatDate, formatDateTime, todayDateOnly } from "@/lib/date";
 import {
   glassCard,
   glassPanelPad,
   heading,
+  mutedText,
   pillPrimarySm,
   tableWrap,
   tableHeadRow,
@@ -24,6 +27,8 @@ export default async function StudentAttendancePage({ params }: { params: Promis
   const history = await getAttendanceHistory(enrollment.id);
   const today = todayDateOnly();
   const markedToday = history.find((a) => a.date.getTime() === today.getTime());
+  const timing = await getExactTodayTiming(sportId);
+  const window = getAttendanceWindow(timing);
 
   return (
     <div>
@@ -33,13 +38,15 @@ export default async function StudentAttendancePage({ params }: { params: Promis
           <p className="mt-2 text-sm text-emerald-300">
             Marked {markedToday.status} at {formatDateTime(markedToday.markedAt)}
           </p>
-        ) : (
+        ) : window.open ? (
           <form action={markOwnAttendanceAction} className="mt-3">
             <input type="hidden" name="sportId" value={sportId} />
             <button type="submit" className={pillPrimarySm}>
               Mark myself present
             </button>
           </form>
+        ) : (
+          <p className={`mt-2 ${mutedText}`}>{window.reason}</p>
         )}
       </div>
 

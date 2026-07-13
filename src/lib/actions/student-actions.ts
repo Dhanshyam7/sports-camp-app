@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { requirePageRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getStudentProfileByUserId } from "@/lib/data/student";
+import { getExactTodayTiming } from "@/lib/data/sport";
 import { todayDateOnly } from "@/lib/date";
+import { getAttendanceWindow } from "@/lib/attendance";
 
 export async function requestEnrollmentAction(formData: FormData) {
   const session = await requirePageRole(["STUDENT"]);
@@ -35,6 +37,10 @@ export async function markOwnAttendanceAction(formData: FormData) {
   if (!enrollment || enrollment.status !== "APPROVED") {
     throw new Error("You are not an approved member of this sport");
   }
+
+  const timing = await getExactTodayTiming(sportId);
+  const window = getAttendanceWindow(timing);
+  if (!window.open) throw new Error(window.reason);
 
   const date = todayDateOnly();
   await prisma.attendance.upsert({

@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { requirePageSportScope } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { findStudentByIdentifier } from "@/lib/data/coordinator";
+import { getExactTodayTiming } from "@/lib/data/sport";
 import { todayDateOnly } from "@/lib/date";
+import { getAttendanceWindow } from "@/lib/attendance";
 
 export async function markRosterAttendanceAction(formData: FormData) {
   const sportId = String(formData.get("sportId") ?? "");
@@ -16,6 +18,10 @@ export async function markRosterAttendanceAction(formData: FormData) {
 
   const enrollment = await prisma.enrollment.findUnique({ where: { id: enrollmentId } });
   if (!enrollment || enrollment.sportId !== sportId) throw new Error("Enrollment not found for this sport");
+
+  const timing = await getExactTodayTiming(sportId);
+  const window = getAttendanceWindow(timing);
+  if (!window.open) throw new Error(window.reason);
 
   const date = todayDateOnly();
   const existing = await prisma.attendance.findUnique({

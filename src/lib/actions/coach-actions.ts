@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { requirePageRole, requirePageSportScope } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getStaffAssignment } from "@/lib/data/staff";
+import { getExactTodayTiming } from "@/lib/data/sport";
 import { todayDateOnly, parseDateOnly } from "@/lib/date";
+import { getAttendanceWindow } from "@/lib/attendance";
 
 export async function createDrillAction(formData: FormData) {
   const sportId = String(formData.get("sportId") ?? "");
@@ -68,6 +70,10 @@ export async function setTimingAction(formData: FormData) {
 export async function markCoachAttendanceAction() {
   const session = await requirePageRole(["COACH"]);
   const assignment = await getStaffAssignment(session.user.id);
+
+  const timing = await getExactTodayTiming(assignment.sportId);
+  const window = getAttendanceWindow(timing);
+  if (!window.open) throw new Error(window.reason);
 
   const date = todayDateOnly();
   await prisma.staffAttendance.upsert({

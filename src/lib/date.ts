@@ -1,6 +1,27 @@
+const IST_TIME_ZONE = "Asia/Kolkata";
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+/** Current instant, shifted so UTC getters read as IST wall-clock values. */
+function nowShiftedToIST() {
+  return new Date(Date.now() + IST_OFFSET_MS);
+}
+
+/** Today's calendar date in India (IST), as a UTC-midnight Date — matches how `@db.Date` columns are stored. */
 export function todayDateOnly() {
-  const d = new Date();
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const shifted = nowShiftedToIST();
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()));
+}
+
+/** Minutes since midnight IST, right now. E.g. 4:30 PM IST -> 990. */
+export function nowISTMinutesOfDay() {
+  const shifted = nowShiftedToIST();
+  return shifted.getUTCHours() * 60 + shifted.getUTCMinutes();
+}
+
+/** Parses "HH:MM" into minutes since midnight. */
+export function timeStringToMinutes(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
 }
 
 /** Parses a "YYYY-MM-DD" (e.g. from <input type="date">) into a UTC date-only value. */
@@ -15,7 +36,12 @@ export function toDateInputValue(date: Date) {
 }
 
 export function formatDate(date: Date) {
-  return new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: IST_TIME_ZONE,
+  });
 }
 
 export function isUpcoming(date: Date) {
@@ -29,5 +55,6 @@ export function formatDateTime(date: Date) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: IST_TIME_ZONE,
   });
 }
