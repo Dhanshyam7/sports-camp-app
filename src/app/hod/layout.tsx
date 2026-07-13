@@ -6,7 +6,7 @@ export default async function HodLayout({ children }: { children: React.ReactNod
   const session = await requirePageRole(["HOD"]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <Topbar name={session.user.name} role={session.user.role} subtitle="All sports" />
       <TabNav
         items={[

@@ -17,7 +17,7 @@ export default async function HodSportLayout({
 
   return (
     <div>
-      <h1 className="mb-4 text-lg font-semibold text-slate-900">{sport.name}</h1>
+      <h1 className="mb-4 text-lg font-semibold tracking-tight text-white">{sport.name}</h1>
       <TabNav
         items={[
           { href: `/hod/${sportId}/attendance`, label: "Attendance" },

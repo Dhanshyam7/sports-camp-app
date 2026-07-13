@@ -1,6 +1,7 @@
 import { requirePageRole } from "@/lib/permissions";
 import { getLoginStats, getSportLoginSummary } from "@/lib/data/admin";
 import { formatDateTime } from "@/lib/date";
+import { heading, tableWrap, tableHeadRow, tableHeadCell, tableRow, tableCell } from "@/lib/ui";
 
 export default async function AdminStatsPage() {
   await requirePageRole(["ADMIN"]);
@@ -9,22 +10,22 @@ export default async function AdminStatsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="mb-3 font-medium text-slate-900">Logins by Sport</h2>
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+        <h2 className={`mb-3 ${heading}`}>Logins by Sport</h2>
+        <div className={tableWrap}>
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <thead className={tableHeadRow}>
               <tr>
-                <th className="px-4 py-2">Sport</th>
-                <th className="px-4 py-2">Players</th>
-                <th className="px-4 py-2">Total Logins</th>
+                <th className={tableHeadCell}>Sport</th>
+                <th className={tableHeadCell}>Players</th>
+                <th className={tableHeadCell}>Total Logins</th>
               </tr>
             </thead>
             <tbody>
               {sportStats.map((s) => (
-                <tr key={s.id} className="border-t border-slate-100">
-                  <td className="px-4 py-2">{s.name}</td>
-                  <td className="px-4 py-2">{s.players}</td>
-                  <td className="px-4 py-2">{s.totalLogins}</td>
+                <tr key={s.id} className={tableRow}>
+                  <td className={tableCell}>{s.name}</td>
+                  <td className={tableCell}>{s.players}</td>
+                  <td className={tableCell}>{s.totalLogins}</td>
                 </tr>
               ))}
             </tbody>
@@ -33,31 +34,31 @@ export default async function AdminStatsPage() {
       </div>
 
       <div>
-        <h2 className="mb-3 font-medium text-slate-900">Logins by User</h2>
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+        <h2 className={`mb-3 ${heading}`}>Logins by User</h2>
+        <div className={tableWrap}>
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <thead className={tableHeadRow}>
               <tr>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Role</th>
-                <th className="px-4 py-2">Sport(s)</th>
-                <th className="px-4 py-2">Total Logins</th>
-                <th className="px-4 py-2">Last Login</th>
+                <th className={tableHeadCell}>Name</th>
+                <th className={tableHeadCell}>Role</th>
+                <th className={tableHeadCell}>Sport(s)</th>
+                <th className={tableHeadCell}>Total Logins</th>
+                <th className={tableHeadCell}>Last Login</th>
               </tr>
             </thead>
             <tbody>
               {userStats.map((u) => (
-                <tr key={u.id} className="border-t border-slate-100">
-                  <td className="px-4 py-2">
+                <tr key={u.id} className={tableRow}>
+                  <td className={tableCell}>
                     {u.name}
-                    <span className="block text-xs text-slate-400">
+                    <span className="block text-xs text-slate-500">
                       @{u.username} &middot; {u.email}
                     </span>
                   </td>
-                  <td className="px-4 py-2">{u.role}</td>
-                  <td className="px-4 py-2">{u.sportLabel}</td>
-                  <td className="px-4 py-2">{u.loginCount}</td>
-                  <td className="px-4 py-2">{u.lastLogin ? formatDateTime(u.lastLogin) : "Never"}</td>
+                  <td className={tableCell}>{u.role}</td>
+                  <td className={tableCell}>{u.sportLabel}</td>
+                  <td className={tableCell}>{u.loginCount}</td>
+                  <td className={tableCell}>{u.lastLogin ? formatDateTime(u.lastLogin) : "Never"}</td>
                 </tr>
               ))}
             </tbody>

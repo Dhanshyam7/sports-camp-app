@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { loginAction } from "@/lib/actions/auth-actions";
+import { inputClass, label, pillPrimary } from "@/lib/ui";
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, undefined);
@@ -9,20 +10,13 @@ export function LoginForm() {
   return (
     <form action={action} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-slate-700" htmlFor="username">
+        <label className={label} htmlFor="username">
           Username
         </label>
-        <input
-          id="username"
-          name="username"
-          type="text"
-          required
-          autoComplete="username"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-        />
+        <input id="username" name="username" type="text" required autoComplete="username" className={inputClass} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700" htmlFor="password">
+        <label className={label} htmlFor="password">
           Password
         </label>
         <input
@@ -31,16 +25,17 @@ export function LoginForm() {
           type="password"
           required
           autoComplete="current-password"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+          className={inputClass}
         />
       </div>
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      <button
-        disabled={pending}
-        type="submit"
-        className="w-full rounded-md bg-slate-900 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
-      >
+      {state?.error && (
+        <p className="rounded-2xl border border-rose-400/30 bg-rose-400/[0.12] px-3 py-2 text-sm text-rose-300">
+          {state.error}
+        </p>
+      )}
+      <button disabled={pending} type="submit" className={`w-full ${pillPrimary}`}>
         {pending ? "Signing in..." : "Sign in"}
+        {!pending && <span aria-hidden>→</span>}
       </button>
     </form>
   );

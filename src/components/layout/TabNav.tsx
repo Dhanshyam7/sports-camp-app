@@ -2,25 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { tabActive, tabInactive } from "@/lib/ui";
 
 export function TabNav({ items }: { items: { href: string; label: string }[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4">
+    <nav className="border-b border-white/10 bg-white/[0.02] backdrop-blur-md">
+      <div className="mx-auto flex max-w-5xl gap-1.5 overflow-x-auto px-4 py-2.5 sm:px-6">
         {items.map((item) => {
           const active = pathname === item.href;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium ${
-                active
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
+            <Link key={item.href} href={item.href} className={`whitespace-nowrap ${active ? tabActive : tabInactive}`}>
               {item.label}
             </Link>
           );

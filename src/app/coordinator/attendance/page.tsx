@@ -1,6 +1,7 @@
 import { requirePageRole } from "@/lib/permissions";
 import { getStaffAssignment, getRosterAttendance } from "@/lib/data/coach";
 import { EditableRoster } from "@/components/attendance/EditableRoster";
+import { heading } from "@/lib/ui";
 
 export default async function CoordinatorAttendancePage() {
   const session = await requirePageRole(["COORDINATOR"]);
@@ -9,7 +10,7 @@ export default async function CoordinatorAttendancePage() {
 
   return (
     <div>
-      <h2 className="mb-3 font-medium text-slate-900">Mark Today&apos;s Attendance</h2>
+      <h2 className={`mb-3 ${heading}`}>Mark Today&apos;s Attendance</h2>
       <EditableRoster sportId={assignment.sportId} roster={roster} />
     </div>
   );

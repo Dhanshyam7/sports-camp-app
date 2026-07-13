@@ -18,17 +18,17 @@ export function Topbar({
   subtitle?: string;
 }) {
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-20 border-b border-white/10 bg-[#060912]/70 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
         <div>
-          <p className="text-sm font-semibold text-slate-900">Sports Camp Management</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-sm font-semibold tracking-tight text-white">Sports Camp</p>
+          <p className="text-xs text-slate-400">
             {ROLE_LABELS[role] ?? role}
             {subtitle ? ` · ${subtitle}` : ""}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-600">{name}</span>
+          <span className="hidden text-sm text-slate-300 sm:inline">{name}</span>
           <LogoutButton />
         </div>
       </div>

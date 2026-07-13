@@ -2,6 +2,7 @@ import { getApprovedEnrollment } from "@/lib/data/student";
 import { getAllMatches } from "@/lib/data/sport";
 import { requirePageRole } from "@/lib/permissions";
 import { formatDateTime, isUpcoming } from "@/lib/date";
+import { glassCard, glassPanelPad, mutedText, statusBadge } from "@/lib/ui";
 
 export default async function StudentMatchesPage({ params }: { params: Promise<{ sportId: string }> }) {
   const { sportId } = await params;
@@ -13,19 +14,15 @@ export default async function StudentMatchesPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-3">
-      {matches.length === 0 && <p className="text-sm text-slate-500">No match schedules yet.</p>}
+      {matches.length === 0 && <p className={mutedText}>No match schedules yet.</p>}
       {matches.map((match) => (
-        <div key={match.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div key={match.id} className={`${glassCard} ${glassPanelPad}`}>
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-slate-900">vs {match.opponent}</h3>
-            {isUpcoming(match.matchDate) && (
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                Upcoming
-              </span>
-            )}
+            <h3 className="font-medium text-white">vs {match.opponent}</h3>
+            {isUpcoming(match.matchDate) && <span className={statusBadge("success")}>Upcoming</span>}
           </div>
-          <p className="mt-1 text-sm text-slate-600">{formatDateTime(match.matchDate)}</p>
-          <p className="text-sm text-slate-500">Venue: {match.venue}</p>
+          <p className="mt-1 text-sm text-slate-300">{formatDateTime(match.matchDate)}</p>
+          <p className="text-sm text-slate-400">Venue: {match.venue}</p>
         </div>
       ))}
     </div>

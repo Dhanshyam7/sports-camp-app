@@ -6,7 +6,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await requirePageRole(["ADMIN"]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <Topbar name={session.user.name} role={session.user.role} />
       <TabNav
         items={[

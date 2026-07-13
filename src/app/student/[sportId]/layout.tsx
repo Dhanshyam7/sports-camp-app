@@ -20,7 +20,7 @@ export default async function StudentSportLayout({
 
   return (
     <div>
-      <h1 className="mb-4 text-lg font-semibold text-slate-900">{enrollment.sport.name}</h1>
+      <h1 className="mb-4 text-lg font-semibold tracking-tight text-white">{enrollment.sport.name}</h1>
       <TabNav
         items={[
           { href: `/student/${sportId}/attendance`, label: "Attendance" },

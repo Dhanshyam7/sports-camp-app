@@ -6,7 +6,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const session = await requirePageRole(["STUDENT"]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <Topbar name={session.user.name} role={session.user.role} />
       <TabNav
         items={[

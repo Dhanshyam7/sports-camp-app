@@ -8,7 +8,7 @@ export default async function CoachLayout({ children }: { children: React.ReactN
   const assignment = await getStaffAssignment(session.user.id);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <Topbar name={session.user.name} role={session.user.role} subtitle={assignment.sport.name} />
       <TabNav
         items={[

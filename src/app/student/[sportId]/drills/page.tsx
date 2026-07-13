@@ -2,6 +2,7 @@ import { getApprovedEnrollment } from "@/lib/data/student";
 import { getDrills } from "@/lib/data/sport";
 import { requirePageRole } from "@/lib/permissions";
 import { formatDate } from "@/lib/date";
+import { glassCard, glassPanelPad, mutedText } from "@/lib/ui";
 
 export default async function StudentDrillsPage({ params }: { params: Promise<{ sportId: string }> }) {
   const { sportId } = await params;
@@ -13,15 +14,15 @@ export default async function StudentDrillsPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-3">
-      {drills.length === 0 && <p className="text-sm text-slate-500">No drills posted yet.</p>}
+      {drills.length === 0 && <p className={mutedText}>No drills posted yet.</p>}
       {drills.map((drill) => (
-        <div key={drill.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div key={drill.id} className={`${glassCard} ${glassPanelPad}`}>
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-slate-900">{drill.title}</h3>
-            <span className="text-xs text-slate-500">{formatDate(drill.createdAt)}</span>
+            <h3 className="font-medium text-white">{drill.title}</h3>
+            <span className="text-xs text-slate-400">{formatDate(drill.createdAt)}</span>
           </div>
-          <p className="mt-1 text-sm text-slate-600">{drill.description}</p>
-          <p className="mt-2 text-xs text-slate-400">Assigned by {drill.coach.name}</p>
+          <p className="mt-1 text-sm text-slate-300">{drill.description}</p>
+          <p className="mt-2 text-xs text-slate-500">Assigned by {drill.coach.name}</p>
         </div>
       ))}
     </div>
