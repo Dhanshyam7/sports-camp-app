@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { requirePageRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { RESET_DATABASE_PHRASE } from "@/lib/constants";
 
 const CreateStaffSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
@@ -116,6 +117,9 @@ export async function deleteStaffAccountAction(formData: FormData) {
     throw new Error("Only an Admin can delete a HOD account");
   }
 
+  // Hard-delete any camp sessions this staff member set — cascades to delete their attendance too.
+  await prisma.campTiming.deleteMany({ where: { setById: userId } });
+
   await prisma.user.delete({ where: { id: userId } });
 
   revalidatePath("/admin/staff");
@@ -147,4 +151,34 @@ export async function deletePlayerAccountAction(formData: FormData) {
 
   revalidatePath("/hod/players");
   revalidatePath("/admin/players");
+}
+
+export type ResetDatabaseState = { error?: string; success?: boolean } | undefined;
+
+export async function resetDatabaseAction(
+  _prevState: ResetDatabaseState,
+  formData: FormData
+): Promise<ResetDatabaseState> {
+  await requirePageRole(["ADMIN"]);
+
+  const confirmation = String(formData.get("confirmation") ?? "");
+  if (confirmation !== RESET_DATABASE_PHRASE) {
+    return { error: `You must type "${RESET_DATABASE_PHRASE}" exactly to confirm.` };
+  }
+
+  await prisma.$transaction([
+    prisma.loginLog.deleteMany({}),
+    prisma.attendance.deleteMany({}),
+    prisma.staffAttendance.deleteMany({}),
+    prisma.attendanceDay.deleteMany({}),
+    prisma.campTiming.deleteMany({}),
+    prisma.matchSchedule.deleteMany({}),
+    prisma.drill.deleteMany({}),
+    prisma.enrollment.deleteMany({}),
+    prisma.staffAssignment.deleteMany({}),
+    prisma.studentProfile.deleteMany({}),
+    prisma.user.deleteMany({ where: { role: { in: ["STUDENT", "COACH", "COORDINATOR"] } } }),
+  ]);
+
+  return { success: true };
 }

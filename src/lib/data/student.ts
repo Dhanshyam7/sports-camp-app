@@ -32,6 +32,10 @@ export async function getAttendanceHistory(enrollmentId: string) {
   });
 }
 
+export async function getPresentDaysCount(enrollmentId: string) {
+  return prisma.attendance.count({ where: { enrollmentId, status: "PRESENT" } });
+}
+
 export async function getJoinableSports(userId: string) {
   const profile = await getStudentProfileByUserId(userId);
   const [allSports, enrollments] = await Promise.all([

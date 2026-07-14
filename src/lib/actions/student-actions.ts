@@ -5,6 +5,7 @@ import { requirePageRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getStudentProfileByUserId } from "@/lib/data/student";
 import { getExactTodayTiming } from "@/lib/data/sport";
+import { getAttendanceDay } from "@/lib/data/attendance";
 import { todayDateOnly } from "@/lib/date";
 import { getAttendanceWindow } from "@/lib/attendance";
 
@@ -43,11 +44,17 @@ export async function markOwnAttendanceAction(formData: FormData) {
   if (!window.open) throw new Error(window.reason);
 
   const date = todayDateOnly();
+  const attendanceDay = await getAttendanceDay(sportId, date);
+  if (attendanceDay?.closedAt) {
+    throw new Error("Attendance for today has been closed by the coordinator.");
+  }
+
   await prisma.attendance.upsert({
     where: { enrollmentId_date: { enrollmentId: enrollment.id, date } },
     update: {},
     create: {
       enrollmentId: enrollment.id,
+      campTimingId: timing!.id,
       date,
       status: "PRESENT",
       markedById: session.user.id,

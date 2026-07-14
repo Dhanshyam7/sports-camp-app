@@ -1,6 +1,7 @@
 import { requirePageRole } from "@/lib/permissions";
-import { getApprovedEnrollment, getAttendanceHistory } from "@/lib/data/student";
+import { getApprovedEnrollment, getAttendanceHistory, getPresentDaysCount } from "@/lib/data/student";
 import { getExactTodayTiming } from "@/lib/data/sport";
+import { getAttendanceDay } from "@/lib/data/attendance";
 import { markOwnAttendanceAction } from "@/lib/actions/student-actions";
 import { getAttendanceWindow } from "@/lib/attendance";
 import { formatDate, formatDateTime, todayDateOnly } from "@/lib/date";
@@ -29,6 +30,11 @@ export default async function StudentAttendancePage({ params }: { params: Promis
   const markedToday = history.find((a) => a.date.getTime() === today.getTime());
   const timing = await getExactTodayTiming(sportId);
   const window = getAttendanceWindow(timing);
+  const [attendanceDay, presentDays] = await Promise.all([
+    getAttendanceDay(sportId, today),
+    getPresentDaysCount(enrollment.id),
+  ]);
+  const isClosed = !!attendanceDay?.closedAt;
 
   return (
     <div>
@@ -38,6 +44,8 @@ export default async function StudentAttendancePage({ params }: { params: Promis
           <p className="mt-2 text-sm text-emerald-300">
             Marked {markedToday.status} at {formatDateTime(markedToday.markedAt)}
           </p>
+        ) : isClosed ? (
+          <p className={`mt-2 ${mutedText}`}>Attendance for today has been closed by the coordinator.</p>
         ) : window.open ? (
           <form action={markOwnAttendanceAction} className="mt-3">
             <input type="hidden" name="sportId" value={sportId} />
@@ -48,6 +56,11 @@ export default async function StudentAttendancePage({ params }: { params: Promis
         ) : (
           <p className={`mt-2 ${mutedText}`}>{window.reason}</p>
         )}
+      </div>
+
+      <div className={`mb-4 ${glassCard} ${glassPanelPad}`}>
+        <p className={mutedText}>Days attended</p>
+        <p className="mt-1 text-2xl font-semibold text-white">{presentDays}</p>
       </div>
 
       <h2 className={`mb-2 ${heading}`}>History</h2>

@@ -26,7 +26,7 @@ export function roleHome(role: Role) {
 /** Page/layout use: redirects instead of throwing. */
 export async function requireSession() {
   const session = await auth();
-  if (!session?.user) redirect("/login");
+  if (!session?.user || session.revoked) redirect("/login");
   return session;
 }
 
@@ -47,7 +47,7 @@ export async function requirePageSportScope(sportId: string, roles: Role[]) {
 /** API route use: throws typed errors mapped to status codes by apiErrorResponse(). */
 export async function requireApiSession() {
   const session = await auth();
-  if (!session?.user) throw new UnauthorizedError("Not signed in");
+  if (!session?.user || session.revoked) throw new UnauthorizedError("Not signed in");
   return session;
 }
 

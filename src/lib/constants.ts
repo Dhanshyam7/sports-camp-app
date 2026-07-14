@@ -1,0 +1,1 @@
+export const RESET_DATABASE_PHRASE = "RESET ALL DATA";

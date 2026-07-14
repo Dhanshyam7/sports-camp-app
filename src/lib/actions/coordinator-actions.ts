@@ -4,14 +4,15 @@ import { revalidatePath } from "next/cache";
 import { requirePageSportScope } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { findStudentByIdentifier } from "@/lib/data/coordinator";
-import { getExactTodayTiming } from "@/lib/data/sport";
-import { todayDateOnly } from "@/lib/date";
+import { getTimingForDate } from "@/lib/data/sport";
+import { todayDateOnly, parseDateOnly } from "@/lib/date";
 import { getAttendanceWindow } from "@/lib/attendance";
 
 export async function markRosterAttendanceAction(formData: FormData) {
   const sportId = String(formData.get("sportId") ?? "");
   const enrollmentId = String(formData.get("enrollmentId") ?? "");
   const status = String(formData.get("status") ?? "");
+  const dateInput = String(formData.get("date") ?? "");
   const session = await requirePageSportScope(sportId, ["COORDINATOR", "HOD"]);
 
   if (status !== "PRESENT" && status !== "ABSENT") throw new Error("Invalid status");
@@ -19,11 +20,11 @@ export async function markRosterAttendanceAction(formData: FormData) {
   const enrollment = await prisma.enrollment.findUnique({ where: { id: enrollmentId } });
   if (!enrollment || enrollment.sportId !== sportId) throw new Error("Enrollment not found for this sport");
 
-  const timing = await getExactTodayTiming(sportId);
+  const date = dateInput ? parseDateOnly(dateInput) : todayDateOnly();
+  const timing = await getTimingForDate(sportId, date);
   const window = getAttendanceWindow(timing);
   if (!window.open) throw new Error(window.reason);
 
-  const date = todayDateOnly();
   const existing = await prisma.attendance.findUnique({
     where: { enrollmentId_date: { enrollmentId, date } },
   });
@@ -35,9 +36,26 @@ export async function markRosterAttendanceAction(formData: FormData) {
     });
   } else {
     await prisma.attendance.create({
-      data: { enrollmentId, date, status, markedById: session.user.id },
+      data: { enrollmentId, campTimingId: timing!.id, date, status, markedById: session.user.id },
     });
   }
+
+  revalidatePath("/coordinator/attendance");
+  revalidatePath(`/hod/${sportId}/attendance`);
+}
+
+export async function closeAttendanceDayAction(formData: FormData) {
+  const sportId = String(formData.get("sportId") ?? "");
+  const dateInput = String(formData.get("date") ?? "");
+  const session = await requirePageSportScope(sportId, ["COORDINATOR", "HOD"]);
+
+  const date = dateInput ? parseDateOnly(dateInput) : todayDateOnly();
+
+  await prisma.attendanceDay.upsert({
+    where: { sportId_date: { sportId, date } },
+    update: { closedAt: new Date(), closedById: session.user.id },
+    create: { sportId, date, closedAt: new Date(), closedById: session.user.id },
+  });
 
   revalidatePath("/coordinator/attendance");
   revalidatePath(`/hod/${sportId}/attendance`);

@@ -46,12 +46,14 @@ model User {
   studentProfile   StudentProfile?
   staffAssignment  StaffAssignment?
   loginLogs        LoginLog[]
+  adminSessions    AdminSession[]
   decidedEnrollments Enrollment[] @relation("EnrollmentDecidedBy")
   createdDrills    Drill[]
   createdMatches   MatchSchedule[]
   setTimings       CampTiming[]
   markedAttendance Attendance[] @relation("AttendanceMarkedBy")
   editedAttendance Attendance[] @relation("AttendanceEditedBy")
+  closedAttendanceDays AttendanceDay[] @relation("AttendanceDayClosedBy")
 }
 
 model StudentProfile {
@@ -90,6 +92,7 @@ model Sport {
   drills           Drill[]
   matches          MatchSchedule[]
   timings          CampTiming[]
+  attendanceDays   AttendanceDay[]
 }
 
 model Enrollment {
@@ -114,6 +117,8 @@ model Attendance {
   id           String           @id @default(cuid())
   enrollmentId String
   enrollment   Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  campTimingId String
+  campTiming   CampTiming       @relation(fields: [campTimingId], references: [id], onDelete: Cascade)
   date         DateTime         @db.Date
   status       AttendanceStatus
   markedAt     DateTime         @default(now())
@@ -125,6 +130,7 @@ model Attendance {
 
   @@unique([enrollmentId, date])
   @@index([date])
+  @@index([campTimingId])
 }
 
 model StaffAttendance {
@@ -175,6 +181,8 @@ model CampTiming {
   setBy     User?    @relation(fields: [setById], references: [id], onDelete: SetNull)
   updatedAt DateTime @updatedAt
 
+  attendance Attendance[]
+
   @@unique([sportId, date])
 }
 
@@ -185,4 +193,30 @@ model LoginLog {
   timestamp DateTime @default(now())
 
   @@index([userId, timestamp])
+}
+
+model AttendanceDay {
+  id         String    @id @default(cuid())
+  sportId    String
+  sport      Sport     @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  date       DateTime  @db.Date
+  closedAt   DateTime?
+  closedById String?
+  closedBy   User?     @relation("AttendanceDayClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
+
+  @@unique([sportId, date])
+}
+
+model AdminSession {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken String    @unique
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime  @default(now())
+  lastSeenAt   DateTime  @default(now())
+  revokedAt    DateTime?
+
+  @@index([userId])
 }

@@ -5,6 +5,7 @@ declare module "next-auth" {
   interface User {
     role: Role;
     sportId: string | null;
+    adminSessionToken?: string | null;
   }
 
   interface Session {
@@ -13,6 +14,8 @@ declare module "next-auth" {
       role: Role;
       sportId: string | null;
     } & DefaultSession["user"];
+    adminSessionToken?: string | null;
+    revoked?: boolean;
   }
 }
 
@@ -21,5 +24,6 @@ declare module "@auth/core/jwt" {
     id: string;
     role: Role;
     sportId: string | null;
+    adminSessionToken?: string | null;
   }
 }

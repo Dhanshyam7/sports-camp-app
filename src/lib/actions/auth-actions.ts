@@ -4,7 +4,7 @@ import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { signIn, signOut } from "@/lib/auth";
+import { auth, signIn, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/permissions";
 
@@ -27,6 +27,12 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
 }
 
 export async function logoutAction() {
+  const session = await auth();
+  if (session?.user?.role === "ADMIN" && session.adminSessionToken) {
+    await prisma.adminSession
+      .updateMany({ where: { sessionToken: session.adminSessionToken }, data: { revokedAt: new Date() } })
+      .catch(() => {});
+  }
   await signOut({ redirectTo: "/login" });
 }
 

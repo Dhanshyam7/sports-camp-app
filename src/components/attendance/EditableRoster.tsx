@@ -1,5 +1,5 @@
 import { markRosterAttendanceAction } from "@/lib/actions/coordinator-actions";
-import { formatDateTime } from "@/lib/date";
+import { formatDateTime, toDateInputValue } from "@/lib/date";
 import type { AttendanceWindow } from "@/lib/attendance";
 import { tableWrap, tableHeadRow, tableHeadCell, tableRow, tableCell, statusBadge, pillSuccess, pillDanger } from "@/lib/ui";
 
@@ -12,13 +12,16 @@ type RosterRow = {
 
 export function EditableRoster({
   sportId,
+  date,
   roster,
   window,
 }: {
   sportId: string;
+  date: Date;
   roster: RosterRow[];
   window: AttendanceWindow;
 }) {
+  const dateValue = toDateInputValue(date);
   return (
     <div className="space-y-3">
       {!window.open && (
@@ -62,6 +65,7 @@ export function EditableRoster({
                   <div className="flex gap-2">
                     <form action={markRosterAttendanceAction}>
                       <input type="hidden" name="sportId" value={sportId} />
+                      <input type="hidden" name="date" value={dateValue} />
                       <input type="hidden" name="enrollmentId" value={row.enrollmentId} />
                       <input type="hidden" name="status" value="PRESENT" />
                       <button type="submit" disabled={!window.open} className={`${pillSuccess} disabled:cursor-not-allowed disabled:opacity-40`}>
@@ -70,6 +74,7 @@ export function EditableRoster({
                     </form>
                     <form action={markRosterAttendanceAction}>
                       <input type="hidden" name="sportId" value={sportId} />
+                      <input type="hidden" name="date" value={dateValue} />
                       <input type="hidden" name="enrollmentId" value={row.enrollmentId} />
                       <input type="hidden" name="status" value="ABSENT" />
                       <button type="submit" disabled={!window.open} className={`${pillDanger} disabled:cursor-not-allowed disabled:opacity-40`}>
